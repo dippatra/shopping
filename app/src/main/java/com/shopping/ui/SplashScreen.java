@@ -1,20 +1,21 @@
 package com.shopping.ui;
 
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.shopping.R;
+import com.shopping.commons.CommonMethods;
+
+import org.json.JSONObject;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 
@@ -22,6 +23,7 @@ public class SplashScreen extends AppCompatActivity {
     private static final String TAG="SplashScreen";
     private CircularProgressBar progressBar;
     private TextView waitingText;
+    Handler handler=new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +34,16 @@ public class SplashScreen extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
         try{
             initializeActivityControl();
+            if(CommonMethods.isOnline(getBaseContext())){
+                if(CommonMethods.getShoppingData(getBaseContext())==null){
+                    fetchData();
+                }else {
+                    showProgressBar();
+
+                }
+            }else {
+                Toast.makeText(this, getString(R.string.no_internet_window_message), Toast.LENGTH_SHORT).show();
+            }
 
         }catch (Exception ex){
             Log.e(TAG,ex.toString());
@@ -47,29 +59,55 @@ public class SplashScreen extends AppCompatActivity {
     }
     private void fetchData(){
         try{
-            showProgressBar();
-            RequestQueue queue = Volley.newRequestQueue(this);
-            String url ="https://stark-spire-93433.herokuapp/json";
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            hideProgressBar();
-
-                        }
-                    }, new Response.ErrorListener() {
+            new AsyncTask<Void, JSONObject, JSONObject>() {
                 @Override
-                public void onErrorResponse(VolleyError error) {
-                    try {
+                protected void onPreExecute() {
+                    super.onPreExecute();
+                    showProgressBar();
+                }
+
+                @Override
+                protected JSONObject doInBackground(Void... params) {
+                    String requestUrl="https://stark-spire-93433.herokuapp.com/json";
+                    String response;
+                    try{
+                        response=CommonMethods.performGet(requestUrl);
+                        if(!response.isEmpty()){
+                            CommonMethods.saveShoppingData(getBaseContext(),response);
+                            return new JSONObject(response);
+                        }
 
 
                     }catch (Exception ex){
                         Log.e(TAG,ex.toString());
                     }
 
+                    return null;
                 }
-            });
-            queue.add(stringRequest);
+
+                @Override
+                protected void onPostExecute(JSONObject Result) {
+                    super.onPostExecute(Result);
+                    try{
+                        hideProgressBar();
+                        if(Result==null){
+                            Toast.makeText(SplashScreen.this, getString(R.string.something_went_wrong_message), Toast.LENGTH_SHORT).show();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    finishAffinity();
+                                }
+                            },100);
+                        }else {
+                            openShoppingListActivity();
+                        }
+
+                    }catch (Exception ex){
+                        Log.e(TAG,ex.toString());
+                    }
+                }
+            }.execute();
+
 
 
         }catch (Exception ex){
@@ -88,8 +126,20 @@ public class SplashScreen extends AppCompatActivity {
     private void showProgressBar(){
         try {
             if(progressBar!=null&&progressBar.getVisibility()==View.INVISIBLE){
-                progressBar.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
             }
+        }catch (Exception ex){
+            Log.e(TAG,ex.toString());
+        }
+    }
+    private void openShoppingListActivity(){
+        Intent intent;
+        try{
+            intent = new Intent(getApplicationContext(),HomeScreen.class);
+            startActivity(intent);
+            overridePendingTransition(R.anim.open_next, R.anim.close_main);
+            finish();
+
         }catch (Exception ex){
             Log.e(TAG,ex.toString());
         }
