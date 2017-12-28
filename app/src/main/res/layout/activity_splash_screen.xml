@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    tools:context="com.shopping.ui.SplashScreen">
+
+    <fr.castorflex.android.circularprogressbar.CircularProgressBar
+        android:id = "@+id/progressbar"
+        android:layout_width = "40dp"
+        android:layout_height = "40dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop = "60dip"
+        android:indeterminate = "true"
+        android:visibility = "invisible"
+        app:cpb_color = "@color/white"
+        app:cpb_max_sweep_angle = "300"
+        app:cpb_min_sweep_angle = "10"
+        app:cpb_rotation_speed = "1.0"
+        app:cpb_stroke_width = "3dp"
+        app:cpb_sweep_speed = "1.0"
+        />
+    <TextView
+        android:id="@+id/waiting_string"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/progressbar"
+        android:textSize="16sp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/white"
+        android:visibility="invisible"
+        android:text="@string/waiting_string"/>
+
+</RelativeLayout>

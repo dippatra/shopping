@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Shopping</string>
+    <string name="waiting_string">Setting up the app for first use</string>
+    <string name="something_went_wrong_message">Oops! Something went wrong here. We are sorry! Please try again later.</string>
+    <string name="no_internet_window_message">Please make sure you have a working internet connection!</string>
+</resources>
